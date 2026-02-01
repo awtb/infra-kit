@@ -8,6 +8,9 @@ restart:
 	docker compose down
 	docker compose up -d
 
+ps:
+	docker compose ps
+
 reset:
 	docker compose down -v
 
