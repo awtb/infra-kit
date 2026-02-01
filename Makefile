@@ -29,6 +29,12 @@ up-%:
 up-mq:
 	docker compose --profile mq up -d rabbitmq
 
+up-adminer:
+	docker compose --profile adminer up -d adminer
+
+up-pgadmin:
+	docker compose --profile pgadmin up -d pgadmin
+
 wipe-rabbitmq:
 	docker compose --profile mq stop rabbitmq || true
 	docker compose --profile mq rm -f rabbitmq || true

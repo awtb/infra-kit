@@ -53,11 +53,34 @@ services:
   adminer:
     image: adminer:4
     container_name: infra_kit_adminer
+    profiles: ["adminer"]
     ports:
       - "${ADMINER_PORT}:8080"
     depends_on:
       postgres:
         condition: service_healthy
+
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    container_name: infra_kit_pgadmin
+    profiles: ["pgadmin"]
+    depends_on:
+      - postgres
+    environment:
+      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_DEFAULT_EMAIL:-admin@example.com}
+      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_DEFAULT_PASSWORD:-changeme}
+      PGADMIN_CONFIG_STORAGE_DIR: "'/var/lib/pgadmin/storage'"
+      PGADMIN_CONFIG_FILE_MANAGER_STORAGE_PATH: "'/var/lib/pgadmin/storage'"
+      PGADMIN_CONFIG_ENHANCED_COOKIE_PROTECTION: "False"
+      PGADMIN_CONFIG_ALLOW_SAVE_PASSWORD: "False"
+      PGADMIN_CONFIG_MAX_LOGIN_ATTEMPTS: "5"
+      PGADMIN_CONFIG_X_FRAME_OPTIONS: "'SAMEORIGIN'"
+    volumes:
+      - pgadmin_data:/var/lib/pgadmin
+      - ./data/pgadmin/servers.json:/pgadmin4/servers.json:ro
+    restart: always
+    ports:
+      - "8035:80"
 
 volumes:
   postgres_data:
@@ -66,3 +89,5 @@ volumes:
     name: infra_kit_redis_data
   rabbitmq_data:
     name: infra_kit_rabbitmq_data
+  pgadmin_data:
+    name: infra_kit_pgadmin_data
