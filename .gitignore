@@ -3,6 +3,5 @@
 *.log
 
 .volumes/
-data/
 
 .DS_Store
