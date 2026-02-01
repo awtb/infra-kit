@@ -1,6 +1,6 @@
 # Infra kit
 
-Local development infrastructure: PostgreSQL, Redis, Adminer, RabbitMQ (optional).
+Local development infrastructure: PostgreSQL, Redis, Adminer, pgAdmin, RabbitMQ (optional).
 Managed via docker compose.
 
 ## Requirements
@@ -18,21 +18,24 @@ make up
 
 - PostgreSQL: `POSTGRES_PORT` (default `5432`)
 - Redis: `REDIS_PORT` (default `6379`)
-- Adminer: `ADMINER_PORT` (default `8080`)
+- Adminer (optional profile `adminer`): `ADMINER_PORT` (default `8080`)
+- pgAdmin (optional profile `pgadmin`): `8035` (UI)
 - RabbitMQ (optional profile `mq`): `5672` (AMQP), `15672` (UI)
 
 ## Common commands
 
 ```bash
-make up # starts all services except mq
+make up # starts postgres + redis
 make down
 make restart
 make reset
 ```
 
-## Optional RabbitMQ
+## Optional services
 
 ```bash
+make up-adminer
+make up-pgadmin
 make up-mq
 ```
 
