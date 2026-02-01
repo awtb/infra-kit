@@ -56,3 +56,9 @@ make wipe-service-name
 ```bash
 make wipe-all
 ```
+
+## Get into psql
+
+```bash
+make psql
+```
