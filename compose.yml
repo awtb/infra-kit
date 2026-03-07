@@ -82,6 +82,59 @@ services:
     ports:
       - "8035:80"
 
+  victoria_metrics:
+    image: victoriametrics/victoria-metrics:latest
+    container_name: infra_kit_victoriametrics
+    profiles: ["metrics"]
+    command:
+      - "-storageDataPath=/victoria-metrics-data"
+      - "-httpListenAddr=:8428"
+    ports:
+      - "${VICTORIA_METRICS_PORT:-8428}:8428"
+    volumes:
+      - victoriametrics_data:/victoria-metrics-data
+
+  victoria_logs:
+    image: victoriametrics/victoria-logs:latest
+    container_name: infra_kit_victoria_logs
+    profiles: ["metrics"]
+    command:
+      - "-storageDataPath=/victoria-logs-data"
+      - "-httpListenAddr=:9428"
+    ports:
+      - "${VICTORIA_LOGS_PORT:-9428}:9428"
+    volumes:
+      - victoria_logs_data:/victoria-logs-data
+
+  grafana:
+    image: grafana/grafana-oss:latest
+    container_name: infra_kit_grafana
+    profiles: ["metrics"]
+    depends_on:
+      - victoria_metrics
+      - victoria_logs
+    environment:
+      GF_SECURITY_ADMIN_USER: ${GRAFANA_ADMIN_USER:-admin}
+      GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_ADMIN_PASSWORD:-admin}
+      GF_INSTALL_PLUGINS: victoriametrics-logs-datasource
+    ports:
+      - "${GRAFANA_PORT:-3000}:3000"
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./data/grafana/provisioning:/etc/grafana/provisioning:ro
+
+  vector:
+    image: timberio/vector:0.40.1-alpine
+    container_name: infra_kit_vector
+    profiles: ["metrics"]
+    depends_on:
+      - victoria_logs
+    command: ["--config", "/etc/vector/vector.toml"]
+    volumes:
+      - ./data/vector/vector.toml:/etc/vector/vector.toml:ro
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    restart: unless-stopped
+
 volumes:
   postgres_data:
     name: infra_kit_postgres_data
@@ -91,3 +144,9 @@ volumes:
     name: infra_kit_rabbitmq_data
   pgadmin_data:
     name: infra_kit_pgadmin_data
+  victoriametrics_data:
+    name: infra_kit_victoriametrics_data
+  victoria_logs_data:
+    name: infra_kit_victoria_logs_data
+  grafana_data:
+    name: infra_kit_grafana_data

@@ -1,0 +1,40 @@
+[sources.docker]
+type = "docker_logs"
+# Include rules (allowlist).
+# Keep lists empty to collect logs from all containers.
+# Add values to limit collection only to matching containers/images/labels.
+include_images = []
+include_labels = []
+
+# Exclude rules (denylist), applied on top of include rules.
+exclude_containers = ["infra_kit_vector"]
+
+[transforms.normalize]
+type = "remap"
+inputs = ["docker"]
+source = '''
+if !exists(.container_name) || .container_name == null {
+  .container_name = "unknown"
+}
+
+if exists(.message) {
+  ._msg = del(.message)
+}
+
+if exists(.timestamp) {
+  ._time = .timestamp
+}
+'''
+
+[sinks.victoria_logs]
+type = "http"
+inputs = ["normalize"]
+uri = "http://victoria_logs:9428/insert/jsonline"
+method = "post"
+compression = "gzip"
+
+[sinks.victoria_logs.encoding]
+codec = "json"
+
+[sinks.victoria_logs.framing]
+method = "newline_delimited"
