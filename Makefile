@@ -35,6 +35,18 @@ up-adminer:
 up-pgadmin:
 	docker compose --profile pgadmin up -d pgadmin
 
+up-metrics:
+	docker compose --profile metrics up -d victoria_metrics victoria_logs vector grafana
+
+up-logs:
+	docker compose --profile metrics up -d victoria_logs vector
+
+up-vector:
+	docker compose --profile metrics up -d vector
+
+up-grafana:
+	docker compose --profile metrics up -d grafana
+
 wipe-rabbitmq:
 	docker compose --profile mq stop rabbitmq || true
 	docker compose --profile mq rm -f rabbitmq || true
