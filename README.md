@@ -1,6 +1,6 @@
 # Infra kit
 
-Local development infrastructure: PostgreSQL, Redis, Adminer, pgAdmin, RabbitMQ (optional).
+Local development infrastructure: PostgreSQL, Redis, Adminer, pgAdmin, RabbitMQ (optional), VictoriaMetrics stack (optional), Vector log collector (optional).
 Managed via docker compose.
 
 ## Requirements
@@ -21,6 +21,10 @@ make up
 - Adminer (optional profile `adminer`): `ADMINER_PORT` (default `8080`)
 - pgAdmin (optional profile `pgadmin`): `8035` (UI)
 - RabbitMQ (optional profile `mq`): `5672` (AMQP), `15672` (UI)
+- VictoriaMetrics (optional profile `metrics`): `VICTORIA_METRICS_PORT` (default `8428`, UI at `/vmui`)
+- VictoriaLogs (optional profile `metrics`): `VICTORIA_LOGS_PORT` (default `9428`)
+- Grafana (optional profile `metrics`): `GRAFANA_PORT` (default `3000`)
+- Vector (optional profile `metrics`): collects Docker logs and sends them to VictoriaLogs
 
 ## Common commands
 
@@ -37,6 +41,34 @@ make reset
 make up-adminer
 make up-pgadmin
 make up-mq
+make up-metrics
+make up-logs
+make up-grafana
+make up-vector
+```
+
+## Vector container filtering
+
+Vector reads Docker logs from the same host. You can restrict which containers are collected via allowlist/denylist rules in `data/vector/vector.toml`.
+
+```toml
+[sources.docker]
+include_containers = ["my_api_1"]
+include_images = ["ghcr.io/my-org/my-api:dev"]
+include_labels = ["com.my-org.logs.collect=true"]
+
+exclude_containers = ["infra_kit_vector"]
+exclude_images = []
+exclude_labels = []
+```
+
+For containers from another `compose.yaml`, label them and include that label in `include_labels`:
+
+```yaml
+services:
+  my-api:
+    labels:
+      com.my-org.logs.collect: "true"
 ```
 
 ## Start a specific service
