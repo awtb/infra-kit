@@ -1,0 +1,9 @@
+global:
+  scrape_interval: 15s
+
+scrape_configs:
+  - job_name: "%{VMAGENT_SCRAPE_JOB_NAME}"
+    metrics_path: "%{VMAGENT_SCRAPE_PATH}"
+    static_configs:
+      - targets:
+          - "%{VMAGENT_SCRAPE_TARGET}"
