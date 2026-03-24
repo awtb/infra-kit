@@ -83,7 +83,7 @@ services:
       - "8035:80"
 
   victoria_metrics:
-    image: victoriametrics/victoria-metrics:latest
+    image: victoriametrics/victoria-metrics:v1.137.0
     container_name: infra_kit_victoriametrics
     profiles: ["metrics"]
     command:
@@ -95,7 +95,7 @@ services:
       - victoriametrics_data:/victoria-metrics-data
 
   victoria_logs:
-    image: victoriametrics/victoria-logs:latest
+    image: victoriametrics/victoria-logs:v1.48.0
     container_name: infra_kit_victoria_logs
     profiles: ["metrics"]
     command:
@@ -107,7 +107,7 @@ services:
       - victoria_logs_data:/victoria-logs-data
 
   vmagent:
-    image: victoriametrics/vmagent:latest
+    image: victoriametrics/vmagent:v1.137.0
     container_name: infra_kit_vmagent
     profiles: ["metrics"]
     depends_on:
@@ -127,7 +127,7 @@ services:
       - ./data/vmagent/prometheus.yml:/etc/vmagent/prometheus.yml:ro
 
   grafana:
-    image: grafana/grafana-oss:latest
+    image: grafana/grafana:12.4.1
     container_name: infra_kit_grafana
     profiles: ["metrics"]
     depends_on:
