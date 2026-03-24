@@ -1,6 +1,6 @@
 # Infra kit
 
-Local development infrastructure: PostgreSQL, Redis, Adminer, pgAdmin, RabbitMQ (optional), VictoriaMetrics stack (optional), Vector log collector (optional).
+Local development infrastructure: PostgreSQL, Redis, Adminer, pgAdmin, RabbitMQ (optional), VictoriaMetrics stack with `vmagent` (optional), Vector log collector (optional).
 Managed via docker compose.
 
 ## Requirements
@@ -22,9 +22,11 @@ make up
 - pgAdmin (optional profile `pgadmin`): `8035` (UI)
 - RabbitMQ (optional profile `mq`): `5672` (AMQP), `15672` (UI)
 - VictoriaMetrics (optional profile `metrics`): `VICTORIA_METRICS_PORT` (default `8428`, UI at `/vmui`)
+- vmagent (optional profile `metrics`): `VMAGENT_PORT` (default `8429`, Prometheus scraper/forwarder for VictoriaMetrics)
 - VictoriaLogs (optional profile `metrics`): `VICTORIA_LOGS_PORT` (default `9428`)
 - Grafana (optional profile `metrics`): `GRAFANA_PORT` (default `3000`)
 - Vector (optional profile `metrics`): collects Docker logs and sends them to VictoriaLogs
+- Metrics/logging endpoints are configurable via `.env`: `VMAGENT_REMOTE_WRITE_URL`, `VMAGENT_SCRAPE_JOB_NAME`, `VMAGENT_SCRAPE_PATH`, `VMAGENT_SCRAPE_TARGET`, `VECTOR_VICTORIA_LOGS_URI`
 
 ## Common commands
 
@@ -47,28 +49,22 @@ make up-grafana
 make up-vector
 ```
 
-## Vector container filtering
+## Metrics stack
 
-Vector reads Docker logs from the same host. You can restrict which containers are collected via allowlist/denylist rules in `data/vector/vector.toml`.
+`make up-metrics` starts VictoriaMetrics, VictoriaLogs, vmagent, Vector, and Grafana.
 
-```toml
-[sources.docker]
-include_containers = ["my_api_1"]
-include_images = ["ghcr.io/my-org/my-api:dev"]
-include_labels = ["com.my-org.logs.collect=true"]
+`vmagent` scrapes a single target configured via `.env`:
 
-exclude_containers = ["infra_kit_vector"]
-exclude_images = []
-exclude_labels = []
+```bash
+VMAGENT_SCRAPE_JOB_NAME=app
+VMAGENT_SCRAPE_PATH=/metrics
+VMAGENT_SCRAPE_TARGET=host.docker.internal:8000
 ```
 
-For containers from another `compose.yaml`, label them and include that label in `include_labels`:
+Vector forwards Docker logs to VictoriaLogs. Its sink endpoint is configurable via:
 
-```yaml
-services:
-  my-api:
-    labels:
-      com.my-org.logs.collect: "true"
+```bash
+VECTOR_VICTORIA_LOGS_URI=http://victoria_logs:9428/insert/jsonline
 ```
 
 ## Start a specific service
@@ -83,6 +79,8 @@ make up-service-name
 make wipe-postgres
 make wipe-redis
 make wipe-rabbitmq
+make wipe-vm
+make wipe-grafana
 make wipe-service-name
 ```
 
