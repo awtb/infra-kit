@@ -16,11 +16,22 @@ make up
 
 ## Services & ports
 
+### Databases
+
 - PostgreSQL: `POSTGRES_PORT` (default `5432`)
 - Redis: `REDIS_PORT` (default `6379`)
+
+### Queues
+
+- RabbitMQ (optional profile `mq`): `5672` (AMQP), `15672` (UI)
+
+### Admin tools
+
 - Adminer (optional profile `adminer`): `ADMINER_PORT` (default `8080`)
 - pgAdmin (optional profile `pgadmin`): `8035` (UI)
-- RabbitMQ (optional profile `mq`): `5672` (AMQP), `15672` (UI)
+
+### Observability
+
 - VictoriaMetrics (optional profile `metrics`): `VICTORIA_METRICS_PORT` (default `8428`, UI at `/vmui`)
 - vmagent (optional profile `metrics`): `VMAGENT_PORT` (default `8429`, Prometheus scraper/forwarder for VictoriaMetrics)
 - VictoriaLogs (optional profile `metrics`): `VICTORIA_LOGS_PORT` (default `9428`)
