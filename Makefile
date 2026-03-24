@@ -36,7 +36,7 @@ up-pgadmin:
 	docker compose --profile pgadmin up -d pgadmin
 
 up-metrics:
-	docker compose --profile metrics up -d victoria_metrics victoria_logs vector grafana
+	docker compose --profile metrics up -d victoria_metrics victoria_logs vmagent vector grafana
 
 up-logs:
 	docker compose --profile metrics up -d victoria_logs vector
@@ -52,6 +52,18 @@ wipe-rabbitmq:
 	docker compose --profile mq rm -f rabbitmq || true
 	docker volume rm -f infra_kit_rabbitmq_data
 	docker compose --profile mq up -d rabbitmq
+
+wipe-vm:
+	docker compose --profile metrics stop victoria_metrics vmagent grafana || true
+	docker compose --profile metrics rm -f victoria_metrics || true
+	docker volume rm -f infra_kit_victoriametrics_data
+	docker compose --profile metrics up -d victoria_metrics vmagent grafana
+
+wipe-grafana:
+	docker compose --profile metrics stop grafana || true
+	docker compose --profile metrics rm -f grafana || true
+	docker volume rm -f infra_kit_grafana_data
+	docker compose --profile metrics up -d grafana
 
 wipe-all:
 	docker compose down -v
