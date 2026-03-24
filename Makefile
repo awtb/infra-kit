@@ -35,6 +35,9 @@ up-adminer:
 up-pgadmin:
 	docker compose --profile pgadmin up -d pgadmin
 
+up-minio:
+	docker compose --profile storage up -d minio
+
 up-metrics:
 	docker compose --profile metrics up -d victoria_metrics victoria_logs vmagent vector grafana
 
