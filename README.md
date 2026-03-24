@@ -30,6 +30,10 @@ make up
 - Adminer (optional profile `adminer`): `ADMINER_PORT` (default `8080`)
 - pgAdmin (optional profile `pgadmin`): `8035` (UI)
 
+### Storage
+
+- MinIO (optional profile `storage`): `MINIO_PORT` (default `9000`, S3 API), `MINIO_CONSOLE_PORT` (default `9001`, UI)
+
 ### Observability
 
 - VictoriaMetrics (optional profile `metrics`): `VICTORIA_METRICS_PORT` (default `8428`, UI at `/vmui`)
@@ -54,6 +58,7 @@ make reset
 make up-adminer
 make up-pgadmin
 make up-mq
+make up-minio
 make up-metrics
 make up-logs
 make up-grafana
