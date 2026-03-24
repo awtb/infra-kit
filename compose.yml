@@ -106,6 +106,26 @@ services:
     volumes:
       - victoria_logs_data:/victoria-logs-data
 
+  vmagent:
+    image: victoriametrics/vmagent:latest
+    container_name: infra_kit_vmagent
+    profiles: ["metrics"]
+    depends_on:
+      - victoria_metrics
+      - victoria_logs
+    command:
+      - "-promscrape.config=/etc/vmagent/prometheus.yml"
+      - "-remoteWrite.url=${VMAGENT_REMOTE_WRITE_URL:-http://victoria_metrics:8428/api/v1/write}"
+      - "-httpListenAddr=:8429"
+    environment:
+      VMAGENT_SCRAPE_JOB_NAME: ${VMAGENT_SCRAPE_JOB_NAME:-app}
+      VMAGENT_SCRAPE_PATH: ${VMAGENT_SCRAPE_PATH:-/metrics}
+      VMAGENT_SCRAPE_TARGET: ${VMAGENT_SCRAPE_TARGET:-host.docker.internal:8000}
+    ports:
+      - "${VMAGENT_PORT:-8429}:8429"
+    volumes:
+      - ./data/vmagent/prometheus.yml:/etc/vmagent/prometheus.yml:ro
+
   grafana:
     image: grafana/grafana-oss:latest
     container_name: infra_kit_grafana
@@ -113,6 +133,7 @@ services:
     depends_on:
       - victoria_metrics
       - victoria_logs
+      - vmagent
     environment:
       GF_SECURITY_ADMIN_USER: ${GRAFANA_ADMIN_USER:-admin}
       GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_ADMIN_PASSWORD:-admin}
@@ -130,6 +151,8 @@ services:
     depends_on:
       - victoria_logs
     command: ["--config", "/etc/vector/vector.toml"]
+    environment:
+      VECTOR_VICTORIA_LOGS_URI: ${VECTOR_VICTORIA_LOGS_URI:-http://victoria_logs:9428/insert/jsonline}
     volumes:
       - ./data/vector/vector.toml:/etc/vector/vector.toml:ro
       - /var/run/docker.sock:/var/run/docker.sock:ro
